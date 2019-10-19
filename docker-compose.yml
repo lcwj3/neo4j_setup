@@ -1,0 +1,24 @@
+version: '2.3'
+# https://github.com/docker/compose/issues/5651
+
+services:
+    neo4j:
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        volumes:
+            - ./data:/data
+            - ./generated_csvs:/var/lib/neo4j/import
+        ports:
+            - 7473:7473
+            - 7687:7687
+            - 7474:7474
+        environment:
+            - NEO4J_dbms_memory_heap_initial__size=8G
+            - NEO4J_dbms_memory_heap_max__size=8G
+            - NEO4J_dbms_memory_pagecache_size=4G
+            - NEO4J_dbms_active__database=graph.db
+            - NEO4J_apoc_export_file_enabled=true
+            - NEO4J_apoc_import_file_enabled=true
+            - NEO4J_apoc_import_file_use__neo4j__config=true
+            - NEO4J_AUTH=none

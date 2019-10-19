@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Set up a neo4j graph with default empty db, default is graph.db in docker-compose.yml file
+docker-compose build
+docker-compose up
+
+# Copy the csv file into container
+
+#$PATH should be your csv file location, and don't forget to modify the folder names for each csvs
+docker cp -a $PATH/import_csv neo4jsetupdocker_neo4j_1:var/lib/neo4j/
+
+#get the neo4j containers name
+docker container ls
+
+#get into the neo4j container
+docker exec -it $neo4j_container_name /bin/bash
+
+#import csv files to neo4j db, don't forget to change file locations
+docker exec -it neo4jsetupdocker_neo4j_1 bin/neo4j-admin import \
+               --mode csv \
+               --database graph_nodes.db \
+               --id-type string \
+               --ignore-duplicate-nodes true \
+               --ignore-missing-nodes true \
+               --multiline-fields true \
+               --nodes "$(ls library/*.csv | tr '\n' ',')" \
+               --nodes "$(ls ver/*.csv | tr '\n' ',')" \
+               --nodes "$(ls vulnerability_nodes/*.csv | tr '\n' ',')" \
+               --relationships "$(ls deps2/*.csv | tr '\n' ',')" \
+               --relationships "$(ls default2/*.csv | tr '\n' ',')" \
+               --relationships "$(ls libdeps2/*.csv | tr '\n' ',')" \
+               --relationships "$(ls upper/*.csv | tr '\n' ',')" \
+               --relationships "$(ls vulnerability_library_edges/*.csv | tr '\n' ',')" \
+               --relationships "$(ls vulnerability_version_edges/*.csv | tr '\n' ',')" \
+               --relationships "$(ls lower/*.csv | tr '\n' ',')"\
+               --relationships "$(ls has/*.csv | tr '\n' ',')"
+
+#after import finishs, check import log file
+vi import.report
+
+#exit the container after check log
+exit
+
+#shut down neo4j
+docker container stop $neo4j_container_name
+
+#replace neo4j db
+// modify the NEO4J_dbms_active__database in docker-compose.yml to graph_nodes.db (the db name specified in import scripts)
+
+#start the neo4j 
+docker-compose up
+
