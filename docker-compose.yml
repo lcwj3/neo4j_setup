@@ -1,4 +1,4 @@
-version: '2.3'
+version: '3'
 # https://github.com/docker/compose/issues/5651
 
 services:
@@ -7,8 +7,7 @@ services:
             context: .
             dockerfile: ./Dockerfile
         volumes:
-            - ./data:/data
-            - ./generated_csvs:/var/lib/neo4j/import
+            - ./data:/data/databases
         ports:
             - 7473:7473
             - 7687:7687
